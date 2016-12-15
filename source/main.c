@@ -13,17 +13,15 @@ int main(void){
     u16 Held;
     u16 Released;
 
-    
     NF_Set2D(0, 0);
-        
+
     NF_SetRootFolder("NITROFS");
-        
+
     NF_InitTiledBgBuffers();
     NF_InitTiledBgSys(0);
 
     NF_LoadTiledBg("Background", "Background", 256, 256);
     NF_CreateTiledBg(0, 3, "Background");
-    
 
     while(1){
         scanKeys();
@@ -31,17 +29,19 @@ int main(void){
         Held = keysHeld();
         Released = keysUp();
 
-        if(KEY_TOUCH & Pressed)
-        {
+        if(KEY_TOUCH & Pressed){
             u16 temp = Pressed;
             iprintf("\n \n \n Tap! -- ");
             u8 index = 0x01;
-            for (u8 bit = 0; bit < 16; bit++)
-            {
+            for(u8 bit = 0; bit < 16; bit++){
                 iprintf("%i", temp & 0x01);
                 temp >>= 1;
             }
             iprintf("\n");
+        }
+
+        if(KEY_A & Pressed){
+            consoleClear();
         }
 
         swiWaitForVBlank();
