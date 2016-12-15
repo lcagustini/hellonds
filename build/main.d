@@ -56,23 +56,7 @@ main.o: /home/lucas/Documentos/Games/nds/hellonds/source/main.c \
  /opt/devkitpro/libnds/include/nds/arm9/sprite.h \
  /opt/devkitpro/libnds/include/nds/arm9/trig_lut.h \
  /opt/devkitpro/libnds/include/nds/arm9/video.h \
- /opt/devkitpro/libnds/include/nds/arm9/videoGL.h \
- /home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_lib.h \
- /home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_defines.h \
- /home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_basic.h \
- /home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_2d.h \
- /home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_tiledbg.h \
- /home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_affinebg.h \
- /home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_bitmapbg.h \
- /home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_mixedbg.h \
- /home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_sprite256.h \
- /home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_text.h \
- /home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_text16.h \
- /home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_colision.h \
- /home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_sound.h \
- /home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_media.h \
- /home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_3d.h \
- /home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_sprite3d.h
+ /opt/devkitpro/libnds/include/nds/arm9/videoGL.h
 
 /opt/devkitpro/libnds/include/nds.h:
 
@@ -189,35 +173,3 @@ main.o: /home/lucas/Documentos/Games/nds/hellonds/source/main.c \
 /opt/devkitpro/libnds/include/nds/arm9/video.h:
 
 /opt/devkitpro/libnds/include/nds/arm9/videoGL.h:
-
-/home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_lib.h:
-
-/home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_defines.h:
-
-/home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_basic.h:
-
-/home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_2d.h:
-
-/home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_tiledbg.h:
-
-/home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_affinebg.h:
-
-/home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_bitmapbg.h:
-
-/home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_mixedbg.h:
-
-/home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_sprite256.h:
-
-/home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_text.h:
-
-/home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_text16.h:
-
-/home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_colision.h:
-
-/home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_sound.h:
-
-/home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_media.h:
-
-/home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_3d.h:
-
-/home/lucas/Documentos/Games/nds/hellonds/nflib/include/nf_sprite3d.h:
