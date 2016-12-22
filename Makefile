@@ -12,12 +12,24 @@ include $(DEVKITARM)/ds_rules
 # TARGET is the name of the output
 # BUILD is the directory where object files & intermediate files will be placed
 # SOURCES is a list of directories containing source code
+# DATA is a list of directories containing binary data
 # INCLUDES is a list of directories containing extra header files
+# GRAPHICS is a list of directories containing files to be processed by grit
+# AUDIO is a list of directories containing files to be processed by mmutil
+# SOUNDBANK_NAME is the name of the maxmod generated soundbank
+#
+# All directories are specified relative to the project directory where
+# the makefile is found.
+#
 #---------------------------------------------------------------------------------
-TARGET		:=	$(shell basename $(CURDIR))
+TARGET		:=	$(notdir $(CURDIR))
 BUILD		:=	build
-SOURCES		:=	gfx source data  
-INCLUDES	:=	include build
+SOURCES		:=	source
+DATA		:=	
+INCLUDES	:=	include
+GRAPHICS	:=	gfx
+AUDIO		:=	audio
+SOUNDBANK_NAME  :=	soundbank
 #---------------------------------------------------------------------------------
 # This part substitutes this include:
 # include $(DEVKITARM)/ds_rules
@@ -58,15 +70,16 @@ GAME_ICON		:=	$(CURDIR)/../icon.bmp
 	@$(LD)  $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
 
 
+
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb -mthumb-interwork
 
 CFLAGS	:=	-g -Wall -O2\
- 			-march=armv5te -mtune=arm946e-s -fomit-frame-pointer\
-			-ffast-math \
-			$(ARCH)
+ 		-march=armv5te -mtune=arm946e-s -fomit-frame-pointer\
+		-ffast-math \
+		$(ARCH)
 
 CFLAGS	+=	$(INCLUDE) -DARM9
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
@@ -74,10 +87,11 @@ CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=ds_arm9.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
+
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:= -lnds9
+LIBS	:= -lmm9 -lnds9
  
  
 #---------------------------------------------------------------------------------
@@ -85,7 +99,7 @@ LIBS	:= -lnds9
 # include and lib
 #---------------------------------------------------------------------------------
 LIBDIRS	:=	$(LIBNDS)
- 
+
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
 # rules for different file extensions
@@ -95,14 +109,19 @@ ifneq ($(BUILD),$(notdir $(CURDIR)))
  
 export OUTPUT	:=	$(CURDIR)/$(TARGET)
  
-export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir))
+export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
+			$(foreach dir,$(DATA),$(CURDIR)/$(dir)) \
+			$(foreach dir,$(GRAPHICS),$(CURDIR)/$(dir)) \
+			$(foreach dir,$(AUDIO),$(CURDIR)/$(dir))
+
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
 CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
-BINFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.bin)))
- 
+BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*))) $(SOUNDBANK_NAME).bin
+PNGFILES	:=	$(foreach dir,$(GRAPHICS),$(notdir $(wildcard $(dir)/*.png)))
+
 #---------------------------------------------------------------------------------
 # use CXX for linking C++ projects, CC for standard C
 #---------------------------------------------------------------------------------
@@ -117,15 +136,21 @@ else
 endif
 #---------------------------------------------------------------------------------
 
-export OFILES	:=	$(BINFILES:.bin=.o) \
-					$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
+export OFILES		:=	$(addsuffix .o,$(BINFILES)) \
+				$(PNGFILES:.png=.o) \
+				$(CPPFILES:.cpp=.o) \
+				$(CFILES:.c=.o) \
+				$(SFILES:.s=.o) \
+
+export AUDIOFILES	:=	$(foreach dir,$(AUDIO),$(notdir $(wildcard $(dir)/*)))
  
-export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
-					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-					-I$(CURDIR)/$(BUILD)
+export INCLUDE		:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
+				$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
+				$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
+				-I$(CURDIR)/$(BUILD)
  
-export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
- 
+export LIBPATHS		:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
+
 .PHONY: $(BUILD) clean
  
 #---------------------------------------------------------------------------------
@@ -136,28 +161,54 @@ $(BUILD):
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds $(TARGET).ds.gba 
+	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds $(TARGET).arm9
  
  
 #---------------------------------------------------------------------------------
 else
  
-DEPENDS	:=	$(OFILES:.o=.d)
- 
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-$(OUTPUT).nds	: 	$(OUTPUT).elf
+$(OUTPUT).nds	: 	$(OUTPUT).arm9
+$(OUTPUT).arm9	:	$(OUTPUT).elf
 $(OUTPUT).elf	:	$(OFILES)
- 
+
+
 #---------------------------------------------------------------------------------
-%.o	:	%.bin
+# The bin2o rule should be copied and modified
+# for each extension used in the data directories
+#---------------------------------------------------------------------------------
+
+#---------------------------------------------------------------------------------
+# This rule creates object files from binary data with the .bin extension
+#---------------------------------------------------------------------------------
+%.bin.o	: %.bin
 #---------------------------------------------------------------------------------
 	@echo $(notdir $<)
-	$(bin2o)
+	@$(bin2o)
+
+#---------------------------------------------------------------------------------
+# This rule creates assembly source files using grit.
+# grit takes an image file and a .grit file describing how the file is to be
+# processed.
+#---------------------------------------------------------------------------------
+%.s %.h	: %.png %.grit
+#---------------------------------------------------------------------------------
+	grit $< -fts -o$*
+
+#---------------------------------------------------------------------------------
+# This rule creates the soundbank file for your project using mmutil.
+# mmutil takes all audio files in the audio folder and puts them into a
+# soundbank file.
+#---------------------------------------------------------------------------------
+$(SOUNDBANK_NAME).bin : $(AUDIOFILES)
+#---------------------------------------------------------------------------------
+	@echo $(notdir $^)
+	@mmutil -d $^ -o$(SOUNDBANK_NAME).bin -h$(SOUNDBANK_NAME).h
+
  
- 
--include $(DEPENDS)
+-include $(DEPSDIR)/*.d
  
 #---------------------------------------------------------------------------------------
 endif
