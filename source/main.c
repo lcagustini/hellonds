@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <nds.h>
 
-void createSquare(int xLoc, int yLoc, OamState* screen, u16* gfx, u16 color){
+void createSquare(int x, int y, OamState* screen, u16* gfx, u16 color){
     dmaFillHalfWords(color, gfx, 16*16*2); // this is how to assign the color fill to the oam gfx
     oamSet(screen, // which display
         1, // the oam entry to set
-        xLoc, yLoc, // x & y location
+        x, y, // x & y location
         0, // priority
         15, // palette for 16 color sprite or alpha for bmp sprite
         SpriteSize_16x16, // size

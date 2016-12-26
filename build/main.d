@@ -1,4 +1,4 @@
-main.o: /home/lucas/Documentos/Games/nds/hellonds/source/main.c \
+main.o: /mnt/c/Users/Lucas/Documents/hellonds/source/main.c \
  /opt/devkitpro/libnds/include/nds.h \
  /opt/devkitpro/libnds/include/nds/libversion.h \
  /opt/devkitpro/libnds/include/nds/ndstypes.h \
