@@ -1,0 +1,1 @@
+square.o: square.s

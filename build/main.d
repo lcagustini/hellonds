@@ -57,7 +57,8 @@ main.o: /home/lucas/Documentos/hellonds/source/main.c \
  /opt/devkitpro/libnds/include/nds/arm9/trig_lut.h \
  /opt/devkitpro/libnds/include/nds/arm9/video.h \
  /opt/devkitpro/libnds/include/nds/arm9/videoGL.h \
- /opt/devkitpro/libnds/include/nds/arm9/nand.h
+ /opt/devkitpro/libnds/include/nds/arm9/nand.h \
+ /home/lucas/Documentos/hellonds/build/square.h
 
 /opt/devkitpro/libnds/include/nds.h:
 
@@ -176,3 +177,5 @@ main.o: /home/lucas/Documentos/hellonds/source/main.c \
 /opt/devkitpro/libnds/include/nds/arm9/videoGL.h:
 
 /opt/devkitpro/libnds/include/nds/arm9/nand.h:
+
+/home/lucas/Documentos/hellonds/build/square.h:
