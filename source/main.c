@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <nds.h>
 
-void createSquare(int x, int y, OamState* screen, u16* gfx, u16 color){
+void createSquare(int x, int y, OamState* screen, void* gfx, u16 color){
     dmaFillHalfWords(color, gfx, 16*16*2); // this is how to assign the color fill to the oam gfx
     oamSet(screen, // which display
         1, // the oam entry to set
@@ -11,7 +11,7 @@ void createSquare(int x, int y, OamState* screen, u16* gfx, u16 color){
         SpriteSize_16x16, // size
         SpriteColorFormat_Bmp, // color type
         gfx, // the oam gfx
-        0, //affine index
+        -1, //affine index
         true, //double the size of rotated sprites
         false, //don't hide the sprite
         false, false, //vflip, hflip
