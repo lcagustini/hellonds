@@ -2,7 +2,7 @@
 #include <nds.h>
 
 void createSquare(int x, int y, OamState* screen, void* gfx, u16 color){
-    dmaFillHalfWords(color, gfx, 16*16*2); // this is how to assign the color fill to the oam gfx
+    dmaFillHalfWords(0b1000000000001101, gfx, 16*16*16); // this is how to assign the color fill to the oam gfx
     oamSet(screen, // which display
         1, // the oam entry to set
         x, y, // x & y location
@@ -41,7 +41,7 @@ int main(void){
     oamInit(&oamSub, SpriteMapping_1D_32, false);
     */
 
-    createSquare(0, 0, &oamMain, mainGFX, ARGB16(1, 31, 12, 12));
+    createSquare(0, 0, &oamMain, mainGFX, 15);
 
     while(1){
         scanKeys();
