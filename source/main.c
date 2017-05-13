@@ -4,6 +4,7 @@
 #include <square.h>
 #include <backTop.h>
 #include <assert.h>
+#include <math.h>
 
 #define SCREEN_WIDTH 256
 #define SCREEN_HEIGHT 192
@@ -19,9 +20,70 @@ typedef struct{
     u8 walking;
     u8 direction;
     u8 walked;
-    float xf, yf;
-    float speed;
+    u8 speed;
 } Square;
+
+// input is a bitfield of keys
+void walk(Square *s, u16 input) {
+
+    if(!s->walking){
+        if(KEY_DOWN & input){
+            s->walking = TRUE;
+            s->direction = DIR_DOWN;
+        }
+        else if(KEY_UP & input){
+            s->walking = TRUE;
+            s->direction = DIR_UP;
+        }
+        else if(KEY_LEFT & input){
+            s->walking = TRUE;
+            s->direction = DIR_LEFT;
+        }
+        else if(KEY_RIGHT & input){
+            s->walking = TRUE;
+            s->direction = DIR_RIGHT;
+        }
+    }
+
+    if(s->walking){
+        s->walked += s->speed;
+        switch(s->direction){
+            case DIR_UP:
+                s->y -= s->speed;
+                if (s->walked > 16) {
+                    s->y += s->walked - 16;
+                }
+                break;
+            case DIR_DOWN:
+                s->y += s->speed;
+                if (s->walked > 16) {
+                    s->y -= s->walked - 16;
+                }
+                break;
+            case DIR_LEFT:
+                s->x -= s->speed;
+                if (s->walked > 16) {
+                    s->x += s->walked - 16;
+                }
+                break;
+            case DIR_RIGHT:
+                s->x += s->speed;
+                if (s->walked > 16) {
+                    s->x -= s->walked - 16;
+                }
+                break;
+            default:
+                assert(0);
+                break;
+        }
+        if(s->walked >= 16){
+            s->walked = 0;
+            s->walking = FALSE;
+            s->direction = DIR_NONE;
+        }
+    }
+
+}
 
 void createSquare(Square s, OamState* screen, int priority){
     oamSet(screen, // which display
@@ -65,8 +127,6 @@ int main(void){
     s.direction = DIR_NONE;
     s.walked = 0;
     s.speed = 1;
-    s.xf = s.x;
-    s.yf = s.y;
 
     timerStart(0, ClockDivider_1024, 0, NULL);
     touchPosition* t = (touchPosition*) malloc(sizeof(touchPosition*));
@@ -95,69 +155,31 @@ int main(void){
         dmaCopy(squareTiles, s.gfx, squareTilesLen);
         createSquare(s, &oamMain, 0);
 
-        if(!s.walking){
-            if(KEY_DOWN & Held){
-                s.walking = TRUE;
-                s.direction = DIR_DOWN;
-            }
-            else if(KEY_UP & Held){
-                s.walking = TRUE;
-                s.direction = DIR_UP;
-            }
-            else if(KEY_LEFT & Held){
-                s.walking = TRUE;
-                s.direction = DIR_LEFT;
-            }
-            else if(KEY_RIGHT & Held){
-                s.walking = TRUE;
-                s.direction = DIR_RIGHT;
-            }
-        }
+        // handle walking
+        // TODO: handle walking by scrolling the background instead of moving the player
+        //       (depending on where the player is)
+        walk(&s, Held);
 
-        if(s.walking){
-            s.walked += s.speed;
-            switch(s.direction){
-                case DIR_UP:
-                    s.yf -= s.speed;
-                    s.y = round(s.yf);
-                    break;
-                case DIR_DOWN:
-                    s.yf += s.speed;
-                    s.y = round(s.yf);
-                    break;
-                case DIR_LEFT:
-                    s.xf -= s.speed;
-                    s.x = round(s.xf);
-                    break;
-                case DIR_RIGHT:
-                    s.xf += s.speed;
-                    s.x = round(s.xf);
-                    break;
-                default:
-                    printf("Deu ruim\n");
-                    break;
-            }
-            assert(s.walked <= 16);
-            if(s.walked == 16){
-                s.walked = 0;
-                s.walking = FALSE;
-                s.direction = DIR_NONE;
-            }
-        }
+        // this is how to scroll the background
+        //bgSetScroll(bgID, 16, 16);
+        //bgUpdate();
 
-        if(KEY_TOUCH & Pressed){
-            iprintf("Tap! -- ");
-            u16 index = 0b1000000000000000;
-            for(u8 bit = 16; bit >= 1; bit--){
-                if (Held & index) iprintf("1");
-                else iprintf("0");
-                index >>= 1;
+        // debug
+        {
+            if(KEY_TOUCH & Pressed){
+                iprintf("Tap! -- ");
+                u16 index = 0b1000000000000000;
+                for(u8 bit = 16; bit >= 1; bit--){
+                    if (Held & index) iprintf("1");
+                    else iprintf("0");
+                    index >>= 1;
+                }
+                iprintf("\n");
             }
-            iprintf("\n");
-        }
 
-        if(KEY_A & Pressed){
-            consoleClear();
+            if(KEY_A & Pressed){
+                consoleClear();
+            }
         }
 
         swiWaitForVBlank();
