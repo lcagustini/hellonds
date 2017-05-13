@@ -1,1 +1,0 @@
-square.o: square.s

@@ -36,7 +36,13 @@
 *.su
 
 # Vim files
-*.swp
+*.sw*
 
 # Desmume
 Desmume/
+
+# build
+build/
+
+# ctags
+tags
