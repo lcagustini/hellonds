@@ -3,12 +3,13 @@
 
 //======================================================================
 //
-//	backTop, 256x192@16, 
-//	Alphabit on.
-//	+ bitmap not compressed
-//	Total size: 98304 = 98304
+//	backTop, 256x192@8, 
+//	+ palette 256 entries, not compressed
+//	+ 110 tiles (t|f reduced) not compressed
+//	+ regular map (flat), not compressed, 32x24 
+//	Total size: 512 + 7040 + 1536 = 9088
 //
-//	Time-stamp: 2017-05-12, 13:38:57
+//	Time-stamp: 2017-05-13, 13:59:52
 //	Exported by Cearn's GBA Image Transmogrifier, v0.8.14
 //	( http://www.coranac.com/projects/#grit )
 //
@@ -17,8 +18,14 @@
 #ifndef GRIT_BACKTOP_H
 #define GRIT_BACKTOP_H
 
-#define backTopBitmapLen 98304
-extern const unsigned int backTopBitmap[24576];
+#define backTopTilesLen 7040
+extern const unsigned int backTopTiles[1760];
+
+#define backTopMapLen 1536
+extern const unsigned short backTopMap[768];
+
+#define backTopPalLen 512
+extern const unsigned short backTopPal[256];
 
 #endif // GRIT_BACKTOP_H
 

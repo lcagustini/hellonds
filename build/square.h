@@ -3,13 +3,13 @@
 
 //======================================================================
 //
-//	square, 16x16@8, 
+//	square, 16x16@4, 
 //	Transparent color : FF,00,FF
 //	+ palette 256 entries, not compressed
 //	+ 4 tiles Metatiled by 2x2 not compressed
-//	Total size: 512 + 256 = 768
+//	Total size: 512 + 128 = 640
 //
-//	Time-stamp: 2017-05-12, 17:51:57
+//	Time-stamp: 2017-05-13, 11:29:39
 //	Exported by Cearn's GBA Image Transmogrifier, v0.8.14
 //	( http://www.coranac.com/projects/#grit )
 //
@@ -18,8 +18,8 @@
 #ifndef GRIT_SQUARE_H
 #define GRIT_SQUARE_H
 
-#define squareTilesLen 256
-extern const unsigned int squareTiles[64];
+#define squareTilesLen 128
+extern const unsigned int squareTiles[32];
 
 #define squarePalLen 512
 extern const unsigned short squarePal[256];
