@@ -68,7 +68,7 @@ int main(void){
     s.walking = FALSE;
     s.direction = DIR_NONE;
     s.walked = 0;
-    s.speed = 0.2;
+    s.speed = 1.5;
     s.xf = s.x;
     s.yf = s.y;
 
