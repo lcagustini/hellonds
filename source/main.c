@@ -23,7 +23,12 @@ typedef struct{
     u8 direction;
     u8 walked;
     u8 speed;
+    OamState* screen;
+    SpriteSize size;
+    SpriteColorFormat color;
 } Object;
+
+u8 objectNumber = 0;
 
 // input is a bitfield of keys
 void walk(Object *s, u16 input) {
@@ -84,21 +89,40 @@ void walk(Object *s, u16 input) {
     }
 }
 
-void updateObject(Object s, OamState* screen){
-    oamSet(screen, // which display
-            s.id, // the oam entry to set
-            s.x, s.y, // x & y location
-            0, // priority
-            0, // palette for 16 color sprite or alpha for bmp sprite
-            SpriteSize_32x32, // size
-            SpriteColorFormat_256Color, // color type
-            s.gfx, // the oam gfx
-            -1, //affine index
-            true, //double the size of rotated sprites
-            false, //don't hide the sprite
-            false, false, //vflip, hflip
-            false //apply mosaic
+void updateObject(Object s){
+    oamSet(s.screen, // which display
+           s.id, // the oam entry to set
+           s.x, s.y, // x & y location
+           0, // priority
+           0, // palette for 16 color sprite or alpha for bmp sprite
+           s.size, // size
+           s.color, // color type
+           s.gfx, // the oam gfx
+           -1, //affine index
+           true, //double the size of rotated sprites
+           false, //don't hide the sprite
+           false, false, //vflip, hflip
+           false //apply mosaic
           );
+}
+
+Object newObject(int x, int y, u8 speed, OamState* screen, SpriteSize size, SpriteColorFormat format){
+    Object s;
+    if(objectNumber <= SPRITE_COUNT){
+        objectNumber++;
+        s.id = objectNumber;
+        s.x = x;
+        s.y = y;
+        s.gfx = oamAllocateGfx(screen, size, format);
+        s.screen = screen;
+        s.size = size;
+        s.color = format;
+        s.walking = FALSE;
+        s.direction = DIR_DOWN;
+        s.walked = 0;
+        s.speed = speed;
+    }
+    return s;
 }
 
 int main(void){
@@ -120,12 +144,7 @@ int main(void){
       oamInit(&oamSub, SpriteMapping_1D_32, false);
       */
 
-    Object s = {.id = 0, .x = 0, .y = 0};
-    s.gfx = oamAllocateGfx(&oamMain, SpriteSize_32x32, SpriteColorFormat_256Color);
-    s.walking = FALSE;
-    s.direction = DIR_DOWN;
-    s.walked = 0;
-    s.speed = 1;
+    Object s = newObject(0, 0, 1, &oamMain, SpriteSize_32x32, SpriteColorFormat_256Color);
 
     timerStart(0, ClockDivider_1024, 0, NULL);
     touchPosition* t = (touchPosition*) malloc(sizeof(touchPosition*));
@@ -133,12 +152,12 @@ int main(void){
     DC_FlushRange(zapdosPal, zapdosPalLen);
     dmaCopy(zapdosPal, SPRITE_PALETTE, zapdosPalLen);
 
-    DC_FlushRange(grassTiles, grassTilesLen);
-    dmaCopy(grassTiles, bgGetGfxPtr(bgID), grassTilesLen);
-    DC_FlushRange(grassMap, grassMapLen);
-    dmaCopy(grassMap, bgGetMapPtr(bgID), grassMapLen);
-    DC_FlushRange(grassPal, grassPalLen);
-    dmaCopy(grassPal, BG_PALETTE, grassPalLen);
+    DC_FlushRange(grassTiles, sizeof(grassTiles));
+    dmaCopyHalfWordsAsynch(0, grassTiles, bgGetGfxPtr(bgID), sizeof(grassTiles));
+    DC_FlushRange(grassMap, sizeof(grassMap));
+    dmaCopyHalfWordsAsynch(1, grassMap, bgGetMapPtr(bgID), sizeof(grassMap));
+    DC_FlushRange(grassPal, sizeof(grassPal));
+    dmaCopyHalfWordsAsynch(2, grassPal, BG_PALETTE, sizeof(grassPal));
 
     u16 dt;
     while(1){
@@ -152,7 +171,7 @@ int main(void){
 
         DC_FlushRange(zapdosTiles, 32*32);
         dmaCopy(zapdosTiles + s.direction*16*16, s.gfx, 32*32);
-        updateObject(s, &oamMain);
+        updateObject(s);
 
         // handle walking
         // TODO: handle walking by scrolling the background instead of moving the player
