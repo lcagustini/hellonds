@@ -2,6 +2,14 @@
 
 u8 objectNumber = 0;
 
+void setObjectGfx(Object *s, uint* tiles, u32 tilesLen, uint *pal, u32 palLen){
+    DC_FlushAll();
+    dmaCopy(pal, SPRITE_PALETTE, palLen);
+    dmaCopy(tiles + s->direction*16*16, s->gfx, tilesLen);
+    s->tiles = tiles;
+    s->tilesLen = tilesLen;
+}
+
 // input is a bitfield of keys
 void walk(Object *s, u16 input) {
     if(!s->walking){
@@ -76,6 +84,7 @@ void updateObject(Object s){
            false, false, //vflip, hflip
            false //apply mosaic
           );
+    dmaCopy(s.tiles + s.direction*16*16, s.gfx, s.tilesLen);
 }
 
 Object newObject(int x, int y, u8 speed, OamState* screen, SpriteSize size, SpriteColorFormat format){

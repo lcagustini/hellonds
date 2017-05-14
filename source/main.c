@@ -1,6 +1,5 @@
 #ifndef NDS
 #define NDS
-#include <stdio.h>
 #include <nds.h>
 #endif
 
@@ -15,14 +14,7 @@
 #define TRUE 1
 #define FALSE 0
 
-int main(void){
-    u16 Pressed;
-    u16 Held;
-
-    consoleDemoInit();
-    consoleClear();
-
-    //Top Screen Sprite Setup
+void setUpScreens(){
     videoSetMode(MODE_0_2D);
 
     vramSetBankA(VRAM_A_MAIN_BG_0x06000000);
@@ -36,52 +28,44 @@ int main(void){
     vramSetBankI(VRAM_I_SUB_SPRITE_EXT_PALETTE);
 
     oamInit(&oamMain, SpriteMapping_1D_128, false);
+}
 
-    //Bottom Screen Sprite Setup
-    /*videoSetModeSub(MODE_0_2D);
-      vramSetBankD(VRAM_D_SUB_SPRITE);
-      oamInit(&oamSub, SpriteMapping_1D_32, false);
-      */
+int main(void){
+    u16 Pressed;
+    u16 Held;
+
+    consoleDemoInit();
+    consoleClear();
+
+    setUpScreens();
 
     Object s = newObject(0, 0, 1, &oamMain, SpriteSize_32x32, SpriteColorFormat_256Color);
+    setObjectGfx(&s, zapdosTiles, zapdosTilesLen, zapdosPal, zapdosPalLen);
+
     Background b = newBackground(0, BgType_Text4bpp, BgSize_T_512x512, 0, 1);
-    setBackgroundGfx(&b, grassTiles, grassTilesLen, grassMap, grassMapLen, grassPal, grassPalLen);
+    setBackgroundGfx(b, grassTiles, grassTilesLen, grassMap, grassMapLen, grassPal, grassPalLen);
 
     timerStart(0, ClockDivider_1024, 0, NULL);
+
     touchPosition* t = (touchPosition*) malloc(sizeof(touchPosition*));
-
-    DC_FlushRange(zapdosPal, zapdosPalLen);
-    dmaCopy(zapdosPal, SPRITE_PALETTE, zapdosPalLen);
-
-    DC_FlushRange(b.tiles, b.tilesLen);
-    dmaCopyHalfWordsAsynch(0, b.tiles, bgGetGfxPtr(b.id), b.tilesLen);
-    DC_FlushRange(b.map, b.mapLen);
-    dmaCopyHalfWordsAsynch(1, b.map, bgGetMapPtr(b.id), b.mapLen);
-    DC_FlushRange(b.pal, b.palLen);
-    dmaCopyHalfWordsAsynch(2, b.pal, BG_PALETTE, b.palLen);
-
     u16 dt;
     while(1){
         scanKeys();
-        Pressed = keysDown();
-        Held = keysHeld();
-
         touchRead(t);
 
+        Pressed = keysDown();
+        Held = keysHeld();
         dt = timerElapsed(0);
-
-        DC_FlushRange(zapdosTiles, 32*32);
-        dmaCopy(zapdosTiles + s.direction*16*16, s.gfx, 32*32);
-        updateObject(s);
 
         // handle walking
         // TODO: handle walking by scrolling the background instead of moving the player
         //       (depending on where the player is)
         walk(&s, Held);
+        updateObject(s);
 
         // this is how to scroll the background
-        //bgSetScroll(bgID, 16, 16);
-        //bgUpdate();
+        bgSetScroll(b.id, 0, 0);
+        bgUpdate();
 
         // debug
         {

@@ -6,14 +6,9 @@ Background newBackground(int layer, BgType type, BgSize size, int mapBase, int t
     return b;
 }
 
-void setBackgroundGfx(Background* b, uint* tiles, u32 tilesLen, uint* map, u32 mapLen, uint* pal, u32 palLen){
-    b->tiles = tiles;
-    b->map = map;
-    b->pal = pal;
-
-    b->palLen = palLen;
-    b->mapLen = mapLen;
-    b->tilesLen = tilesLen;
+void setBackgroundGfx(Background b, uint* tiles, u32 tilesLen, uint* map, u32 mapLen, uint* pal, u32 palLen){
+    DC_FlushAll();
+    dmaCopyHalfWordsAsynch(0, tiles, bgGetGfxPtr(b.id), tilesLen);
+    dmaCopyHalfWordsAsynch(1, map, bgGetMapPtr(b.id), mapLen);
+    dmaCopyHalfWordsAsynch(2, pal, BG_PALETTE, palLen);
 }
-
-

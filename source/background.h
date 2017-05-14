@@ -1,6 +1,5 @@
 #ifndef NDS
 #define NDS
-#include <stdio.h>
 #include <nds.h>
 #endif
 
@@ -12,4 +11,4 @@ typedef struct{
 
 Background newBackground(int layer, BgType type, BgSize size, int mapBase, int tileBase);
 
-void setBackgroundGfx(Background* b, uint* tiles, u32 tilesLen, uint* map, u32 mapLen, uint* pal, u32 palLen);
+void setBackgroundGfx(Background b, uint* tiles, u32 tilesLen, uint* map, u32 mapLen, uint* pal, u32 palLen);

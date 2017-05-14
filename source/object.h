@@ -1,6 +1,5 @@
 #ifndef NDS
 #define NDS
-#include <stdio.h>
 #include <nds.h>
 #endif
 
@@ -17,7 +16,11 @@ typedef struct{
     OamState* screen;
     SpriteSize size;
     SpriteColorFormat color;
+    uint *tiles;
+    u32 tilesLen;
 } Object;
+
+void setObjectGfx(Object *s, uint* tiles, u32 tilesLen, uint *pal, u32 palLen);
 
 void walk(Object *s, u16 input);
 
