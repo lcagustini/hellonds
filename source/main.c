@@ -18,10 +18,14 @@ typedef struct{
     u16* gfx;
     u8 walking;
     u8 direction;
-    u8 walked;
+    float walked;
     float xf, yf;
     float speed;
 } Square;
+
+u16 round(float n){
+    return (u16)(n+0.5);
+}
 
 void createSquare(Square s, OamState* screen, int priority){
     oamSet(screen, // which display
@@ -64,7 +68,7 @@ int main(void){
     s.walking = FALSE;
     s.direction = DIR_NONE;
     s.walked = 0;
-    s.speed = 1;
+    s.speed = 0.2;
     s.xf = s.x;
     s.yf = s.y;
 
@@ -137,8 +141,7 @@ int main(void){
                     printf("Deu ruim\n");
                     break;
             }
-            assert(s.walked <= 16);
-            if(s.walked == 16){
+            if(s.walked >= 16){
                 s.walked = 0;
                 s.walking = FALSE;
                 s.direction = DIR_NONE;
