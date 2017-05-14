@@ -1,17 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <nds.h>
-#include <square.h>
-#include <backTop.h>
 #include <assert.h>
 #include <math.h>
+
+#include <zapdos.h>
+#include <backTop.h>
+#include <grass.h>
 
 #define SCREEN_WIDTH 256
 #define SCREEN_HEIGHT 192
 #define TRUE 1
 #define FALSE 0
 
-enum Directions{DIR_NONE = 0, DIR_UP, DIR_DOWN, DIR_LEFT, DIR_RIGHT};
+enum Directions{DIR_UP, DIR_LEFT, DIR_DOWN, DIR_RIGHT};
 
 typedef struct{
     u8 id;
@@ -21,11 +23,10 @@ typedef struct{
     u8 direction;
     u8 walked;
     u8 speed;
-} Square;
+} Object;
 
 // input is a bitfield of keys
-void walk(Square *s, u16 input) {
-
+void walk(Object *s, u16 input) {
     if(!s->walking){
         if(KEY_DOWN & input){
             s->walking = TRUE;
@@ -79,19 +80,18 @@ void walk(Square *s, u16 input) {
         if(s->walked >= 16){
             s->walked = 0;
             s->walking = FALSE;
-            s->direction = DIR_NONE;
         }
     }
 }
 
-void createSquare(Square s, OamState* screen, int priority){
+void updateObject(Object s, OamState* screen){
     oamSet(screen, // which display
             s.id, // the oam entry to set
             s.x, s.y, // x & y location
-            priority, // priority
+            0, // priority
             0, // palette for 16 color sprite or alpha for bmp sprite
-            SpriteSize_16x16, // size
-            SpriteColorFormat_16Color, // color type
+            SpriteSize_32x32, // size
+            SpriteColorFormat_256Color, // color type
             s.gfx, // the oam gfx
             -1, //affine index
             true, //double the size of rotated sprites
@@ -112,7 +112,7 @@ int main(void){
     videoSetMode(MODE_0_2D);
     vramSetBankA(VRAM_A_MAIN_BG);
     oamInit(&oamMain, SpriteMapping_1D_128, false);
-    int bgID = bgInit(0, BgType_Text8bpp, BgSize_T_256x256, 0, 1);
+    int bgID = bgInit(0, BgType_Text8bpp, BgSize_T_512x512, 0, 1);
 
     //Bottom Screen Sprite Setup
     /*videoSetModeSub(MODE_0_2D);
@@ -120,25 +120,25 @@ int main(void){
       oamInit(&oamSub, SpriteMapping_1D_32, false);
       */
 
-    Square s = {.id = 0, .x = 50, .y = 50};
-    s.gfx = oamAllocateGfx(&oamMain, SpriteSize_16x16, SpriteColorFormat_16Color);
+    Object s = {.id = 0, .x = 0, .y = 0};
+    s.gfx = oamAllocateGfx(&oamMain, SpriteSize_32x32, SpriteColorFormat_256Color);
     s.walking = FALSE;
-    s.direction = DIR_NONE;
+    s.direction = DIR_DOWN;
     s.walked = 0;
     s.speed = 1;
 
     timerStart(0, ClockDivider_1024, 0, NULL);
     touchPosition* t = (touchPosition*) malloc(sizeof(touchPosition*));
 
-    DC_FlushRange(squarePal, squarePalLen);
-    dmaCopy(squarePal, SPRITE_PALETTE, squarePalLen);
+    DC_FlushRange(zapdosPal, zapdosPalLen);
+    dmaCopy(zapdosPal, SPRITE_PALETTE, zapdosPalLen);
 
-    DC_FlushRange(backTopTiles, backTopTilesLen);
-    dmaCopy(backTopTiles, bgGetGfxPtr(bgID), backTopTilesLen);
-    DC_FlushRange(backTopMap, backTopMapLen);
-    dmaCopy(backTopMap, bgGetMapPtr(bgID), backTopMapLen);
-    DC_FlushRange(backTopPal, backTopPalLen);
-    dmaCopy(backTopPal, BG_PALETTE, backTopPalLen);
+    DC_FlushRange(grassTiles, grassTilesLen);
+    dmaCopy(grassTiles, bgGetGfxPtr(bgID), grassTilesLen);
+    DC_FlushRange(grassMap, grassMapLen);
+    dmaCopy(grassMap, bgGetMapPtr(bgID), grassMapLen);
+    DC_FlushRange(grassPal, grassPalLen);
+    dmaCopy(grassPal, BG_PALETTE, grassPalLen);
 
     u16 dt;
     while(1){
@@ -150,9 +150,9 @@ int main(void){
 
         dt = timerElapsed(0);
 
-        DC_FlushRange(squareTiles, squareTilesLen);
-        dmaCopy(squareTiles, s.gfx, squareTilesLen);
-        createSquare(s, &oamMain, 0);
+        DC_FlushRange(zapdosTiles, 32*32);
+        dmaCopy(zapdosTiles + s.direction*16*16, s.gfx, 32*32);
+        updateObject(s, &oamMain);
 
         // handle walking
         // TODO: handle walking by scrolling the background instead of moving the player
