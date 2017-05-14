@@ -1,129 +1,19 @@
+#ifndef NDS
+#define NDS
 #include <stdio.h>
-#include <stdlib.h>
 #include <nds.h>
-#include <assert.h>
-#include <math.h>
+#endif
+
+#include "object.h"
+#include "background.h"
 
 #include <zapdos.h>
-#include <backTop.h>
 #include <grass.h>
 
 #define SCREEN_WIDTH 256
 #define SCREEN_HEIGHT 192
 #define TRUE 1
 #define FALSE 0
-
-enum Directions{DIR_UP, DIR_LEFT, DIR_DOWN, DIR_RIGHT};
-
-typedef struct{
-    u8 id;
-    u8 x, y;
-    u16* gfx;
-    u8 walking;
-    u8 direction;
-    u8 walked;
-    u8 speed;
-    OamState* screen;
-    SpriteSize size;
-    SpriteColorFormat color;
-} Object;
-
-u8 objectNumber = 0;
-
-// input is a bitfield of keys
-void walk(Object *s, u16 input) {
-    if(!s->walking){
-        if(KEY_DOWN & input){
-            s->walking = TRUE;
-            s->direction = DIR_DOWN;
-        }
-        else if(KEY_UP & input){
-            s->walking = TRUE;
-            s->direction = DIR_UP;
-        }
-        else if(KEY_LEFT & input){
-            s->walking = TRUE;
-            s->direction = DIR_LEFT;
-        }
-        else if(KEY_RIGHT & input){
-            s->walking = TRUE;
-            s->direction = DIR_RIGHT;
-        }
-    }
-
-    if(s->walking){
-        s->walked += s->speed;
-        switch(s->direction){
-            case DIR_UP:
-                s->y -= s->speed;
-                if (s->walked > 16) {
-                    s->y += s->walked - 16;
-                }
-                break;
-            case DIR_DOWN:
-                s->y += s->speed;
-                if (s->walked > 16) {
-                    s->y -= s->walked - 16;
-                }
-                break;
-            case DIR_LEFT:
-                s->x -= s->speed;
-                if (s->walked > 16) {
-                    s->x += s->walked - 16;
-                }
-                break;
-            case DIR_RIGHT:
-                s->x += s->speed;
-                if (s->walked > 16) {
-                    s->x -= s->walked - 16;
-                }
-                break;
-            default:
-                assert(0);
-                break;
-        }
-        if(s->walked >= 16){
-            s->walked = 0;
-            s->walking = FALSE;
-        }
-    }
-}
-
-void updateObject(Object s){
-    oamSet(s.screen, // which display
-           s.id, // the oam entry to set
-           s.x, s.y, // x & y location
-           0, // priority
-           0, // palette for 16 color sprite or alpha for bmp sprite
-           s.size, // size
-           s.color, // color type
-           s.gfx, // the oam gfx
-           -1, //affine index
-           true, //double the size of rotated sprites
-           false, //don't hide the sprite
-           false, false, //vflip, hflip
-           false //apply mosaic
-          );
-}
-
-Object newObject(int x, int y, u8 speed, OamState* screen, SpriteSize size, SpriteColorFormat format){
-    Object s;
-    if(objectNumber <= SPRITE_COUNT){
-        objectNumber++;
-        s.id = objectNumber;
-        s.x = x;
-        s.y = y;
-        s.gfx = oamAllocateGfx(screen, size, format);
-        s.screen = screen;
-        s.size = size;
-        s.color = format;
-        s.walking = FALSE;
-        s.direction = DIR_DOWN;
-        s.walked = 0;
-        s.speed = speed;
-    }
-    return s;
-}
 
 int main(void){
     u16 Pressed;
@@ -134,9 +24,18 @@ int main(void){
 
     //Top Screen Sprite Setup
     videoSetMode(MODE_0_2D);
-    vramSetBankA(VRAM_A_MAIN_BG);
+
+    vramSetBankA(VRAM_A_MAIN_BG_0x06000000);
+    vramSetBankB(VRAM_B_MAIN_SPRITE_0x06400000);
+    vramSetBankC(VRAM_C_SUB_BG_0x06200000);
+    vramSetBankD(VRAM_D_SUB_SPRITE);
+    vramSetBankE(VRAM_E_LCD);
+    vramSetBankF(VRAM_F_BG_EXT_PALETTE_SLOT01);
+    vramSetBankG(VRAM_G_SPRITE_EXT_PALETTE);
+    vramSetBankH(VRAM_H_SUB_BG_EXT_PALETTE);
+    vramSetBankI(VRAM_I_SUB_SPRITE_EXT_PALETTE);
+
     oamInit(&oamMain, SpriteMapping_1D_128, false);
-    int bgID = bgInit(0, BgType_Text8bpp, BgSize_T_512x512, 0, 1);
 
     //Bottom Screen Sprite Setup
     /*videoSetModeSub(MODE_0_2D);
@@ -145,6 +44,8 @@ int main(void){
       */
 
     Object s = newObject(0, 0, 1, &oamMain, SpriteSize_32x32, SpriteColorFormat_256Color);
+    Background b = newBackground(0, BgType_Text4bpp, BgSize_T_512x512, 0, 1);
+    setBackgroundGfx(&b, grassTiles, grassTilesLen, grassMap, grassMapLen, grassPal, grassPalLen);
 
     timerStart(0, ClockDivider_1024, 0, NULL);
     touchPosition* t = (touchPosition*) malloc(sizeof(touchPosition*));
@@ -152,12 +53,12 @@ int main(void){
     DC_FlushRange(zapdosPal, zapdosPalLen);
     dmaCopy(zapdosPal, SPRITE_PALETTE, zapdosPalLen);
 
-    DC_FlushRange(grassTiles, sizeof(grassTiles));
-    dmaCopyHalfWordsAsynch(0, grassTiles, bgGetGfxPtr(bgID), sizeof(grassTiles));
-    DC_FlushRange(grassMap, sizeof(grassMap));
-    dmaCopyHalfWordsAsynch(1, grassMap, bgGetMapPtr(bgID), sizeof(grassMap));
-    DC_FlushRange(grassPal, sizeof(grassPal));
-    dmaCopyHalfWordsAsynch(2, grassPal, BG_PALETTE, sizeof(grassPal));
+    DC_FlushRange(b.tiles, b.tilesLen);
+    dmaCopyHalfWordsAsynch(0, b.tiles, bgGetGfxPtr(b.id), b.tilesLen);
+    DC_FlushRange(b.map, b.mapLen);
+    dmaCopyHalfWordsAsynch(1, b.map, bgGetMapPtr(b.id), b.mapLen);
+    DC_FlushRange(b.pal, b.palLen);
+    dmaCopyHalfWordsAsynch(2, b.pal, BG_PALETTE, b.palLen);
 
     u16 dt;
     while(1){
