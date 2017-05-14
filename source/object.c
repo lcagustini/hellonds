@@ -2,12 +2,12 @@
 
 u8 objectNumber = 0;
 
-void setObjectGfx(Object *s, uint* tiles, u32 tilesLen, uint *pal, u32 palLen){
+void setObjectGfx(Object *s, gfx_t *data){
     DC_FlushAll();
-    dmaCopy(pal, SPRITE_PALETTE, palLen);
-    dmaCopy(tiles + s->direction*16*16, s->gfx, tilesLen);
-    s->tiles = tiles;
-    s->tilesLen = tilesLen;
+    dmaCopy(data->pal, SPRITE_PALETTE, data->palLen);
+    dmaCopy(data->tiles + s->direction*16*16, s->gfx, data->tilesLen);
+    s->tiles = data->tiles;
+    s->tilesLen = data->tilesLen;
 }
 
 // input is a bitfield of keys

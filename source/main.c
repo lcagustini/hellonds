@@ -3,14 +3,14 @@
 #include <nds.h>
 #endif
 
+#include <stdio.h>
+
 #include "object.h"
 #include "background.h"
 
 #include <zapdos.h>
 #include <grass.h>
 
-#define SCREEN_WIDTH 256
-#define SCREEN_HEIGHT 192
 #define TRUE 1
 #define FALSE 0
 
@@ -40,10 +40,12 @@ int main(void){
     setUpScreens();
 
     Object s = newObject(0, 0, 1, &oamMain, SpriteSize_32x32, SpriteColorFormat_256Color);
-    setObjectGfx(&s, zapdosTiles, zapdosTilesLen, zapdosPal, zapdosPalLen);
+    CREATE_OBJECT_GFX(zapdos);
+    setObjectGfx(&s, &zapdos);
 
     Background b = newBackground(0, BgType_Text4bpp, BgSize_T_512x512, 0, 1);
-    setBackgroundGfx(b, grassTiles, grassTilesLen, grassMap, grassMapLen, grassPal, grassPalLen);
+    CREATE_BG_GFX(grass);
+    setBackgroundGfx(b, &grass);
 
     timerStart(0, ClockDivider_1024, 0, NULL);
 

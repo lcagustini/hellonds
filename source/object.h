@@ -3,6 +3,8 @@
 #include <nds.h>
 #endif
 
+#include "gfx.h"
+
 enum Directions{DIR_UP, DIR_LEFT, DIR_DOWN, DIR_RIGHT};
 
 typedef struct{
@@ -16,11 +18,11 @@ typedef struct{
     OamState* screen;
     SpriteSize size;
     SpriteColorFormat color;
-    uint *tiles;
+    const uint *tiles;
     u32 tilesLen;
 } Object;
 
-void setObjectGfx(Object *s, uint* tiles, u32 tilesLen, uint *pal, u32 palLen);
+void setObjectGfx(Object *s, gfx_t *data);
 
 void walk(Object *s, u16 input);
 
