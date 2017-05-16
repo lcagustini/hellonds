@@ -8,7 +8,9 @@
 #include "object.h"
 #include "background.h"
 
+#include <moltres.h>
 #include <zapdos.h>
+#include <player_gfx.h>
 #include <grass.h>
 
 #define TRUE 1
@@ -27,21 +29,23 @@ void setUpScreens(){
     vramSetBankH(VRAM_H_SUB_BG_EXT_PALETTE);
     vramSetBankI(VRAM_I_SUB_SPRITE_EXT_PALETTE);
 
-    oamInit(&oamMain, SpriteMapping_1D_128, false);
+    oamInit(&oamMain, SpriteMapping_1D_128, true);
 }
 
 int main(void){
     u16 Pressed;
     u16 Held;
 
+    powerOn(POWER_ALL);
     consoleDemoInit();
     consoleClear();
 
     setUpScreens();
 
-    Object s = newObject(0, 0, 1, &oamMain, SpriteSize_32x32, SpriteColorFormat_256Color);
-    CREATE_OBJECT_GFX(zapdos);
-    setObjectGfx(&s, &zapdos);
+    World w = {0};
+
+    CREATE_OBJECT_GFX(player_gfx);
+    Object *player = newObject(&w, 0, 0, 1, &oamMain, SpriteSize_16x32, SpriteColorFormat_16Color, &player_gfx);
 
     Background b = newBackground(0, BgType_Text4bpp, BgSize_T_512x512, 0, 1);
     CREATE_BG_GFX(grass);
@@ -62,30 +66,13 @@ int main(void){
         // handle walking
         // TODO: handle walking by scrolling the background instead of moving the player
         //       (depending on where the player is)
-        walk(&s, Held);
-        updateObject(s);
+        walk(&w, player, Held);
 
         // this is how to scroll the background
         bgSetScroll(b.id, 0, 0);
         bgUpdate();
 
-        // debug
-        {
-            if(KEY_TOUCH & Pressed){
-                iprintf("Tap! -- ");
-                u16 index = 0b1000000000000000;
-                for(u8 bit = 16; bit >= 1; bit--){
-                    if (Held & index) iprintf("1");
-                    else iprintf("0");
-                    index >>= 1;
-                }
-                iprintf("\n");
-            }
-
-            if(KEY_A & Pressed){
-                consoleClear();
-            }
-        }
+        updateScreens(&w);
 
         swiWaitForVBlank();
         oamUpdate(&oamSub);

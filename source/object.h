@@ -4,6 +4,7 @@
 #endif
 
 #include "gfx.h"
+#define GRID_UNIT_SIZE 16
 
 enum Directions{DIR_UP, DIR_LEFT, DIR_DOWN, DIR_RIGHT};
 
@@ -18,14 +19,17 @@ typedef struct{
     OamState* screen;
     SpriteSize size;
     SpriteColorFormat color;
-    const uint *tiles;
-    u32 tilesLen;
+    gfx_t *gfxData;
+    u8 priority;
 } Object;
 
-void setObjectGfx(Object *s, gfx_t *data);
+typedef struct{
+    Object *objects[20];
+    u8 objectNumber;
+} World;
 
-void walk(Object *s, u16 input);
+void walk(World *w, Object *s, u16 input);
 
-void updateObject(Object s);
+void updateScreens();
     
-Object newObject(int x, int y, u8 speed, OamState* screen, SpriteSize size, SpriteColorFormat format);
+Object *newObject(World *w, int x, int y, u8 speed, OamState* screen, SpriteSize size, SpriteColorFormat format, gfx_t *data);
