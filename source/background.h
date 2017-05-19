@@ -13,4 +13,4 @@ typedef struct{
 
 Background newBackground(int layer, gfx_t *data, BgType type, BgSize size, int mapBase, int tileBase);
 
-void setBackgroundGfx(Background b, int offset);
+void setBackgroundGfx(Background b);

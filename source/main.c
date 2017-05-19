@@ -16,7 +16,7 @@
 #define FALSE 0
 
 void setUpScreens(){
-    videoSetMode(MODE_5_2D);
+    videoSetMode(MODE_0_2D);
 
     vramSetBankA(VRAM_A_MAIN_BG_0x06000000);
     vramSetBankB(VRAM_B_MAIN_SPRITE_0x06400000);
@@ -51,12 +51,12 @@ int main(void){
     vramSetBankE(VRAM_E_LCD);
 
     CREATE_BG_GFX(grass);
-    Background b = newBackground(1, &grass, BgType_Text8bpp, BgSize_T_256x256, 1, 0);
-    setBackgroundGfx(b, 0);
+    Background b = newBackground(2, &grass, BgType_Text8bpp, BgSize_T_256x256, 1, 0);
+    setBackgroundGfx(b);
 
     CREATE_BG_GFX(center);
     Background b2 = newBackground(0, &center, BgType_Text8bpp, BgSize_T_256x256, 2, 1);
-    setBackgroundGfx(b2, 0);
+    setBackgroundGfx(b2);
 
     vramSetBankE(VRAM_E_BG_EXT_PALETTE);
 

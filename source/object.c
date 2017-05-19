@@ -86,7 +86,7 @@ void updateObject(Object s){
     oamSet(s.screen, // which display
            s.priority, // the oam entry to set
            s.x, s.y, // x & y location
-           0, // priority
+           1, // priority
            s.id, // palette for 16 color sprite or alpha for bmp sprite
            s.size, // size
            s.color, // color type
