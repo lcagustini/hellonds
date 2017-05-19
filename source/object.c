@@ -1,5 +1,15 @@
 #include "object.h"
 
+//TODO: Colide with world
+int detectWalkable(World *w, int x, int  y){
+    for(int i = 0; i < w->objectNumber; i++){
+        Object obj = *(w->objects[i]);
+        if(obj.x == x && obj.y == y)
+            return FALSE;
+    }
+    return TRUE;
+}
+
 // input is a bitfield of keys
 void walk(World *w, Object *s, u16 input) {
     if(!s->walking){
@@ -119,16 +129,6 @@ void updateScreens(World *w){
     for(int i = 0; i < w->objectNumber; i++){
         updateObject(*(w->objects[i]));
     }
-}
-
-//TODO: Colide with world
-int detectWalkable(World *w, int x, int  y){
-    for(int i = 0; i < w->objectNumber; i++){
-        Object obj = *(w->objects[i]);
-        if(obj.x == x && obj.y == y)
-            return FALSE;
-    }
-    return TRUE;
 }
 
 Object *newObject(World *w, int x, int y, u8 speed, OamState* screen, SpriteSize size, SpriteColorFormat format, gfx_t *data){

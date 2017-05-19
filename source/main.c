@@ -8,23 +8,22 @@
 #include "object.h"
 #include "background.h"
 
-#include <moltres.h>
-#include <zapdos.h>
 #include <player_gfx.h>
 #include <grass.h>
+#include <center.h>
 
 #define TRUE 1
 #define FALSE 0
 
 void setUpScreens(){
-    videoSetMode(MODE_0_2D);
+    videoSetMode(MODE_5_2D);
 
     vramSetBankA(VRAM_A_MAIN_BG_0x06000000);
     vramSetBankB(VRAM_B_MAIN_SPRITE_0x06400000);
     vramSetBankC(VRAM_C_SUB_BG_0x06200000);
     vramSetBankD(VRAM_D_SUB_SPRITE);
-    vramSetBankE(VRAM_E_LCD);
-    vramSetBankF(VRAM_F_BG_EXT_PALETTE_SLOT01);
+    vramSetBankE(VRAM_E_BG_EXT_PALETTE);
+    vramSetBankF(VRAM_F_LCD);
     vramSetBankG(VRAM_G_SPRITE_EXT_PALETTE);
     vramSetBankH(VRAM_H_SUB_BG_EXT_PALETTE);
     vramSetBankI(VRAM_I_SUB_SPRITE_EXT_PALETTE);
@@ -47,9 +46,19 @@ int main(void){
     CREATE_OBJECT_GFX(player_gfx);
     Object *player = newObject(&w, 0, 0, 1, &oamMain, SpriteSize_16x32, SpriteColorFormat_16Color, &player_gfx);
 
-    Background b = newBackground(0, BgType_Text4bpp, BgSize_T_512x512, 0, 1);
+    bgExtPaletteEnable();
+
+    vramSetBankE(VRAM_E_LCD);
+
     CREATE_BG_GFX(grass);
-    setBackgroundGfx(b, &grass);
+    Background b = newBackground(1, &grass, BgType_Text8bpp, BgSize_T_256x256, 1, 0);
+    setBackgroundGfx(b, 0);
+
+    CREATE_BG_GFX(center);
+    Background b2 = newBackground(0, &center, BgType_Text8bpp, BgSize_T_256x256, 2, 1);
+    setBackgroundGfx(b2, 0);
+
+    vramSetBankE(VRAM_E_BG_EXT_PALETTE);
 
     timerStart(0, ClockDivider_1024, 0, NULL);
 
@@ -69,7 +78,7 @@ int main(void){
         walk(&w, player, Held);
 
         // this is how to scroll the background
-        bgSetScroll(b.id, 0, 0);
+        //bgSetScroll(b.id, 0, 0);
         bgUpdate();
 
         updateScreens(&w);

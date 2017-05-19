@@ -7,10 +7,10 @@
 
 typedef struct{
     int id;
-    uint *tiles, *map, *pal;
-    u32 tilesLen, mapLen, palLen;
+    gfx_t *data;
+    u8 layer;
 } Background;
 
-Background newBackground(int layer, BgType type, BgSize size, int mapBase, int tileBase);
+Background newBackground(int layer, gfx_t *data, BgType type, BgSize size, int mapBase, int tileBase);
 
-void setBackgroundGfx(Background b, gfx_t *data);
+void setBackgroundGfx(Background b, int offset);
