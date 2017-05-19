@@ -41,24 +41,44 @@ int main(void){
 
     setUpScreens();
 
-    World w = {0};
+    World w = {.grid = {
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0},
+        {0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0},
+        {0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0},
+        {0,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    }};
 
     CREATE_OBJECT_GFX(player_gfx);
     Object *player = newObject(&w, 0, 0, 1, &oamMain, SpriteSize_16x32, SpriteColorFormat_16Color, &player_gfx);
+    newObject(&w, 48, 96, 1, &oamMain, SpriteSize_16x32, SpriteColorFormat_16Color, &player_gfx);
 
-    bgExtPaletteEnable();
+    {
+        bgExtPaletteEnable();
 
-    vramSetBankE(VRAM_E_LCD);
+        vramSetBankE(VRAM_E_LCD);
 
-    CREATE_BG_GFX(grass);
-    Background b = newBackground(2, &grass, BgType_Text8bpp, BgSize_T_256x256, 1, 0);
-    setBackgroundGfx(b);
+        CREATE_BG_GFX(grass);
+        Background b = newBackground(2, &grass, BgType_Text8bpp, BgSize_T_256x256, 1, 0);
+        setBackgroundGfx(b);
 
-    CREATE_BG_GFX(center);
-    Background b2 = newBackground(0, &center, BgType_Text8bpp, BgSize_T_256x256, 2, 1);
-    setBackgroundGfx(b2);
+        CREATE_BG_GFX(center);
+        Background b2 = newBackground(0, &center, BgType_Text8bpp, BgSize_T_256x256, 2, 1);
+        setBackgroundGfx(b2);
 
-    vramSetBankE(VRAM_E_BG_EXT_PALETTE);
+        vramSetBankE(VRAM_E_BG_EXT_PALETTE);
+    }
 
     timerStart(0, ClockDivider_1024, 0, NULL);
 

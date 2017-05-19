@@ -7,11 +7,14 @@ int detectWalkable(World *w, int x, int  y){
         if(obj.x == x && obj.y == y)
             return FALSE;
     }
+    if(w->grid[y/GRID_UNIT_SIZE][x/GRID_UNIT_SIZE] == 1)
+        return FALSE;
     return TRUE;
 }
 
 // input is a bitfield of keys
 void walk(World *w, Object *s, u16 input) {
+    iprintf("x: %d y: %d\n", s->x, s->y);
     if(!s->walking){
         if(KEY_DOWN & input){
             if(detectWalkable(w, s->x, s->y + GRID_UNIT_SIZE)){
@@ -77,7 +80,7 @@ void walk(World *w, Object *s, u16 input) {
     }
 }
 
-void updateObject(Object s){
+void updateObject(Object s, int priority){
     bool hflip = false;
     if(s.direction == DIR_RIGHT){
         hflip = true;
@@ -86,7 +89,7 @@ void updateObject(Object s){
     oamSet(s.screen, // which display
            s.priority, // the oam entry to set
            s.x, s.y, // x & y location
-           1, // priority
+           priority, // priority
            s.id, // palette for 16 color sprite or alpha for bmp sprite
            s.size, // size
            s.color, // color type
@@ -126,8 +129,13 @@ void updateScreens(World *w){
 
     oamClear(&oamMain, 0, 0);
     oamClear(&oamSub, 0, 0);
+    u8 p;
     for(int i = 0; i < w->objectNumber; i++){
-        updateObject(*(w->objects[i]));
+        p = w->grid[w->objects[i]->y/GRID_UNIT_SIZE][w->objects[i]->x/GRID_UNIT_SIZE];
+        sassert(p != 1, "Sprite mislocated");
+        if(p == 2) p = 0;
+        else p = 1;
+        updateObject(*(w->objects[i]), p);
     }
 }
 

@@ -26,6 +26,7 @@ typedef struct{
 typedef struct{
     Object *objects[20];
     u8 objectNumber;
+    u8 grid[256/GRID_UNIT_SIZE][256/GRID_UNIT_SIZE];
 } World;
 
 void walk(World *w, Object *s, u16 input);
