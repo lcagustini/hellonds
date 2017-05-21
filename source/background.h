@@ -1,16 +1,11 @@
 #ifndef NDS
 #define NDS
 #include <nds.h>
+#include "types.h"
 #endif
 
-#include "gfx.h"
+Background *newBackground(World *w, int layer, gfx_t *data, BgType type, BgSize size, int mapBase, int tileBase);
 
-typedef struct{
-    int id;
-    gfx_t *data;
-    u8 layer;
-} Background;
+void startBgDraw();
 
-Background newBackground(int layer, gfx_t *data, BgType type, BgSize size, int mapBase, int tileBase);
-
-void setBackgroundGfx(Background b);
+void endBgDraw();

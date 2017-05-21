@@ -3,5 +3,7 @@
 -gB8
 -pn256
 -ps0
--pT4
+-pT15
+-gTFF00FF
 -mLs
+-mR8

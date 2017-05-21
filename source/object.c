@@ -1,6 +1,5 @@
 #include "object.h"
 
-//TODO: Colide with world
 int detectWalkable(World *w, int x, int  y){
     for(int i = 0; i < w->objectNumber; i++){
         Object obj = *(w->objects[i]);
@@ -80,7 +79,7 @@ void walk(World *w, Object *s, u16 input) {
     }
 }
 
-void updateObject(Object s, int priority){
+void updateObject(Object s){
     bool hflip = false;
     if(s.direction == DIR_RIGHT){
         hflip = true;
@@ -88,8 +87,8 @@ void updateObject(Object s, int priority){
     }
     oamSet(s.screen, // which display
            s.priority, // the oam entry to set
-           s.x, s.y, // x & y location
-           priority, // priority
+           120, 80, // x & y location
+           1, // priority
            s.id, // palette for 16 color sprite or alpha for bmp sprite
            s.size, // size
            s.color, // color type
@@ -133,9 +132,7 @@ void updateScreens(World *w){
     for(int i = 0; i < w->objectNumber; i++){
         p = w->grid[w->objects[i]->y/GRID_UNIT_SIZE][w->objects[i]->x/GRID_UNIT_SIZE];
         sassert(p != 1, "Sprite mislocated");
-        if(p == 2) p = 0;
-        else p = 1;
-        updateObject(*(w->objects[i]), p);
+        updateObject(*(w->objects[i]));
     }
 }
 

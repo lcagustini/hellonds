@@ -1,6 +1,7 @@
 #ifndef NDS
 #define NDS
 #include <nds.h>
+#include "types.h"
 #endif
 
 #include <stdio.h>
@@ -11,9 +12,7 @@
 #include <player_gfx.h>
 #include <grass.h>
 #include <center.h>
-
-#define TRUE 1
-#define FALSE 0
+#include <centerTop.h>
 
 void setUpScreens(){
     videoSetMode(MODE_0_2D);
@@ -41,44 +40,48 @@ int main(void){
 
     setUpScreens();
 
-    World w = {.grid = {
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0},
-        {0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0},
-        {0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0},
-        {0,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-    }};
+    World w = {0};
+
+    // pokemon center hitbox
+    for (int x = 2; x < 7; x++)
+    {
+        for (int y = 2; y < 5; y++)
+        {
+            w.grid[y][x] = 1;
+        }
+    }
+
+    // rock hitbox
+    for (int x = 16; x < 19; x++)
+    {
+        for (int y = 16; y < 18; y++)
+        {
+            w.grid[y][x] = 1;
+        }
+    }
+
+    // world border
+    for(int x = 0; x < WORLD_SIZE_TILES; x++){
+        for(int y = 0; y < WORLD_SIZE_TILES; y++){
+            if(y == 0 || y == WORLD_SIZE_TILES -1 || x == 0 || x == WORLD_SIZE_TILES -1){
+                w.grid[y][x] = 1;
+            }
+        }
+    }
 
     CREATE_OBJECT_GFX(player_gfx);
-    Object *player = newObject(&w, 0, 0, 1, &oamMain, SpriteSize_16x32, SpriteColorFormat_16Color, &player_gfx);
-    newObject(&w, 48, 96, 1, &oamMain, SpriteSize_16x32, SpriteColorFormat_16Color, &player_gfx);
+    Object *player = newObject(&w, 128, 128, 2, &oamMain, SpriteSize_16x32, SpriteColorFormat_16Color, &player_gfx);
 
-    {
-        bgExtPaletteEnable();
+    startBgDraw();
+    CREATE_BG_GFX(grass);
+    newBackground(&w, 2, &grass, BgType_Text8bpp, BgSize_T_512x512, 9, 3);
 
-        vramSetBankE(VRAM_E_LCD);
+    CREATE_BG_GFX(center);
+    newBackground(&w, 1, &center, BgType_Text8bpp, BgSize_T_512x512, 4, 2);
 
-        CREATE_BG_GFX(grass);
-        Background b = newBackground(2, &grass, BgType_Text8bpp, BgSize_T_256x256, 1, 0);
-        setBackgroundGfx(b);
-
-        CREATE_BG_GFX(center);
-        Background b2 = newBackground(0, &center, BgType_Text8bpp, BgSize_T_256x256, 2, 1);
-        setBackgroundGfx(b2);
-
-        vramSetBankE(VRAM_E_BG_EXT_PALETTE);
-    }
+    CREATE_BG_GFX(centerTop);
+    newBackground(&w, 0, &centerTop, BgType_Text8bpp, BgSize_T_512x512, 0, 1);
+    endBgDraw();
 
     timerStart(0, ClockDivider_1024, 0, NULL);
 
@@ -98,7 +101,9 @@ int main(void){
         walk(&w, player, Held);
 
         // this is how to scroll the background
-        //bgSetScroll(b.id, 0, 0);
+        bgSetScroll(w.bgs[0]->id, player->x-120, player->y-80);
+        bgSetScroll(w.bgs[1]->id, player->x-120, player->y-80);
+        bgSetScroll(w.bgs[2]->id, player->x-120, player->y-80);
         bgUpdate();
 
         updateScreens(&w);
