@@ -101,9 +101,11 @@ int main(void){
         walk(&w, player, Held);
 
         // this is how to scroll the background
-        bgSetScroll(w.bgs[0]->id, player->x-120, player->y-80);
-        bgSetScroll(w.bgs[1]->id, player->x-120, player->y-80);
-        bgSetScroll(w.bgs[2]->id, player->x-120, player->y-80);
+        w.camera_x = player->x-120;
+        w.camera_y = player->y-80;
+        bgSetScroll(w.bgs[0]->id, w.camera_x, w.camera_y);
+        bgSetScroll(w.bgs[1]->id, w.camera_x, w.camera_y);
+        bgSetScroll(w.bgs[2]->id, w.camera_x, w.camera_y);
         bgUpdate();
 
         updateScreens(&w);

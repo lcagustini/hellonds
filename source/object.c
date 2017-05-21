@@ -6,14 +6,14 @@ int detectWalkable(World *w, int x, int  y){
         if(obj.x == x && obj.y == y)
             return FALSE;
     }
-    if(w->grid[y/GRID_UNIT_SIZE][x/GRID_UNIT_SIZE] == 1)
+    if(w->grid[y/GRID_UNIT_SIZE][x/GRID_UNIT_SIZE])
         return FALSE;
     return TRUE;
 }
 
 // input is a bitfield of keys
 void walk(World *w, Object *s, u16 input) {
-    iprintf("x: %d y: %d\n", s->x, s->y);
+    //iprintf("x: %d y: %d\n", s->x, s->y);
     if(!s->walking){
         if(KEY_DOWN & input){
             if(detectWalkable(w, s->x, s->y + GRID_UNIT_SIZE)){
@@ -110,7 +110,18 @@ void updateObject(Object s){
 void updateScreens(World *w){
     Object *levels[12][16] = {0};
     for(int i = 0; i < w->objectNumber; i++) {
-        u8 level = w->objects[i]->y/GRID_UNIT_SIZE;
+        int y = w->objects[i]->y - w->camera_y;
+        int x = w->objects[i]->x - w->camera_x;
+
+        // if sprite is out of screen, set its priority to 3
+        if (y >= 192 || y < 0)
+        {
+            w->objects[i]->priority = 3;
+            continue;
+        }
+
+        // otherwise, store its position on the screen
+        u8 level = y/GRID_UNIT_SIZE;
         for(int j = 0; j < 16; j++) {
             if(!levels[level][j]) {
                 levels[level][j] = w->objects[i];
@@ -118,6 +129,8 @@ void updateScreens(World *w){
             }
         }
     }
+
+    // set right priority for every sprite on the screen
     u8 c = 127;
     for(int i = 0; i < 12; i++) {
         for (int j = 0; j < 16; j++) {
@@ -128,10 +141,7 @@ void updateScreens(World *w){
 
     oamClear(&oamMain, 0, 0);
     oamClear(&oamSub, 0, 0);
-    u8 p;
     for(int i = 0; i < w->objectNumber; i++){
-        p = w->grid[w->objects[i]->y/GRID_UNIT_SIZE][w->objects[i]->x/GRID_UNIT_SIZE];
-        sassert(p != 1, "Sprite mislocated");
         updateObject(*(w->objects[i]));
     }
 }

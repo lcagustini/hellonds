@@ -52,5 +52,7 @@ typedef struct{
     Background *bgs[4];
     u8 objectNumber;
     u8 grid[WORLD_SIZE_TILES][WORLD_SIZE_TILES];
+    int camera_x;
+    int camera_y;
 } World;
 #endif
