@@ -85,9 +85,25 @@ void updateObject(Object s){
         hflip = true;
         s.direction = DIR_LEFT;
     }
+
+    int x, y;
+    if(s.x <= 112)
+        x = s.x +8;
+    else if(s.x >= 384)
+        x = s.x -264;
+    else
+        x = 120;
+
+    if(s.y <= 80)
+        y = s.y;
+    else if(s.y >= 416)
+        y = s.y -336;
+    else
+        y = 80;
+
     oamSet(s.screen, // which display
            s.priority, // the oam entry to set
-           120, 80, // x & y location
+           x, y, // x & y location
            1, // priority
            s.id, // palette for 16 color sprite or alpha for bmp sprite
            s.size, // size

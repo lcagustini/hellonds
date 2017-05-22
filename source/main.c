@@ -11,7 +11,6 @@
 
 #include <player_gfx.h>
 #include <grass.h>
-#include <center.h>
 #include <centerTop.h>
 
 void setUpScreens(){
@@ -43,9 +42,9 @@ int main(void){
     World w = {0};
 
     // pokemon center hitbox
-    for (int x = 2; x < 7; x++)
+    for (int x = 12; x < 17; x++)
     {
-        for (int y = 2; y < 5; y++)
+        for (int y = 9; y < 12; y++)
         {
             w.grid[y][x] = 1;
         }
@@ -74,13 +73,10 @@ int main(void){
 
     startBgDraw();
     CREATE_BG_GFX(grass);
-    newBackground(&w, 2, &grass, BgType_Text8bpp, BgSize_T_512x512, 9, 3);
-
-    CREATE_BG_GFX(center);
-    newBackground(&w, 1, &center, BgType_Text8bpp, BgSize_T_512x512, 4, 2);
+    newBackground(&w, 1, &grass, BgType_Text8bpp, BgSize_T_512x512, 12, 1);
 
     CREATE_BG_GFX(centerTop);
-    newBackground(&w, 0, &centerTop, BgType_Text8bpp, BgSize_T_512x512, 0, 1);
+    newBackground(&w, 0, &centerTop, BgType_Text8bpp, BgSize_T_512x512, 1, 0);
     endBgDraw();
 
     timerStart(0, ClockDivider_1024, 0, NULL);
@@ -95,14 +91,23 @@ int main(void){
         Held = keysHeld();
         dt = timerElapsed(0);
 
-        // handle walking
-        // TODO: handle walking by scrolling the background instead of moving the player
-        //       (depending on where the player is)
         walk(&w, player, Held);
 
         // this is how to scroll the background
-        w.camera_x = player->x-120;
-        w.camera_y = player->y-80;
+        if(player->x <= 112)
+            w.camera_x = -8;
+        else if(player-> x >= 384)
+            w.camera_x = 264;
+        else
+            w.camera_x = player->x-120;
+
+        if(player->y <= 80)
+            w.camera_y = 0;
+        else if(player->y >= 416)
+            w.camera_y = 336;
+        else
+            w.camera_y = player->y-80;
+
         bgSetScroll(w.bgs[0]->id, w.camera_x, w.camera_y);
         bgSetScroll(w.bgs[1]->id, w.camera_x, w.camera_y);
         bgSetScroll(w.bgs[2]->id, w.camera_x, w.camera_y);
